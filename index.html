@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0d13">
+<title>Evoris HQ — Komuta Merkezi</title>
+<style>
+  :root{
+    --bg:#0a0d13; --bg2:#0d111a; --panel:#141a26; --panel2:#1b2331; --line:#26304328;
+    --line2:#2a3446; --txt:#e9eef7; --mut:#8b96ac; --dim:#5c667a;
+    --acc:#4f8cff; --acc-d:#2a5cc0; --gold:#ffb545; --teal:#2fd8c4;
+    --ok:#36d399; --warn:#ffb020; --bad:#f06363; --purple:#b98cff;
+    --rad:14px; --rad-s:10px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:radial-gradient(1200px 600px at 80% -10%, #14204010, transparent),
+               radial-gradient(900px 500px at -10% 10%, #2fd8c40a, transparent), var(--bg);
+    color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5; font-size:15px; min-height:100vh;
+  }
+  a{color:var(--acc)}
+  .hidden{display:none !important}
+
+  /* ---------- LOGIN ---------- */
+  #login{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:22px}
+  #login .box{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--line2);border-radius:20px;padding:30px 24px;box-shadow:0 30px 80px #0008}
+  #login .logo{font-size:30px;font-weight:800;letter-spacing:-.5px;text-align:center}
+  #login .logo span{background:linear-gradient(90deg,var(--gold),var(--teal));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  #login .tag{text-align:center;color:var(--mut);font-size:13px;margin-top:4px;margin-bottom:22px}
+  #login .who{display:flex;gap:10px;margin-bottom:16px}
+  #login .who button{flex:1;padding:14px 8px;border-radius:12px;background:var(--panel2);border:1px solid var(--line2);color:var(--txt);cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;transition:.15s}
+  #login .who button.on{border-color:var(--acc);background:#4f8cff18;box-shadow:0 0 0 3px #4f8cff18}
+  #login .who button small{display:block;color:var(--mut);font-weight:400;font-size:11px;margin-top:2px}
+
+  /* ---------- LAYOUT ---------- */
+  .app{display:flex;min-height:100vh}
+  aside{width:230px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--line2);padding:18px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
+  aside .b{display:flex;align-items:center;gap:9px;padding:0 8px 16px;font-weight:800;font-size:17px;letter-spacing:-.3px}
+  aside .b .d{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok)}
+  aside .b span{background:linear-gradient(90deg,var(--gold),var(--teal));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  aside nav{display:flex;flex-direction:column;gap:2px}
+  aside nav button{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:none;border:none;color:var(--mut);font-family:inherit;font-size:14px;padding:10px 11px;border-radius:10px;cursor:pointer;transition:.12s}
+  aside nav button .ic{font-size:17px;width:22px;text-align:center}
+  aside nav button:hover{background:var(--panel);color:var(--txt)}
+  aside nav button.active{background:linear-gradient(90deg,#4f8cff1f,transparent);color:var(--txt);box-shadow:inset 2px 0 0 var(--acc)}
+  aside .foot{margin-top:14px;padding:12px 8px 0;border-top:1px solid var(--line2)}
+  .whoami{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--mut);padding:6px 8px}
+  .whoami .av{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--acc),var(--teal));display:flex;align-items:center;justify-content:center;font-weight:800;color:#04121f;font-size:13px}
+
+  main{flex:1;min-width:0;padding:24px 28px 60px;max-width:1100px;margin:0 auto;width:100%}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+  .topbar h1{font-size:22px;margin:0;font-weight:800;letter-spacing:-.4px}
+  .topbar .sub{color:var(--mut);font-size:13px;margin-top:2px}
+  .sync{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mut);background:var(--panel);border:1px solid var(--line2);padding:7px 11px;border-radius:20px;cursor:pointer}
+  .sync .d{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+  .sync.on .d{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+  .sync.off .d{background:var(--warn)}
+  .sync.err .d{background:var(--bad)}
+
+  .view{display:none;animation:fade .25s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .card{background:var(--panel);border:1px solid var(--line2);border-radius:var(--rad);padding:18px;margin-bottom:16px}
+  .card h2{font-size:16px;margin:0 0 4px;font-weight:700}
+  .card h3{font-size:12px;color:var(--mut);font-weight:700;margin:0 0 12px;text-transform:uppercase;letter-spacing:.7px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:720px){.g3,.g4{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:15px;text-align:center}
+  .stat .big{font-size:23px;font-weight:800;color:var(--acc);line-height:1.1}
+  .stat .lbl{font-size:11px;color:var(--mut);margin-top:5px}
+  .stat.gold .big{color:var(--gold)} .stat.ok .big{color:var(--ok)} .stat.teal .big{color:var(--teal)} .stat.bad .big{color:var(--bad)}
+  .pbar{height:10px;background:var(--panel2);border-radius:6px;overflow:hidden;margin-top:10px;border:1px solid var(--line2)}
+  .pbar>div{height:100%;background:linear-gradient(90deg,var(--acc),var(--teal));width:0%;transition:width .5s}
+  .pbar.gold>div{background:linear-gradient(90deg,var(--gold),#ff7a45)}
+  .pill{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;background:var(--panel2);border:1px solid var(--line2);color:var(--mut);font-weight:600}
+  .pill.p-ajans{color:var(--acc);border-color:#2a4a7a} .pill.p-egitim{color:var(--gold);border-color:#6a541f}
+  .pill.p-youtube{color:var(--bad);border-color:#6a2a2a} .pill.p-x{color:var(--teal);border-color:#1f5a52}
+  .pill.p-insta{color:var(--purple);border-color:#4a2f6a} .pill.p-sistem{color:var(--ok);border-color:#1f5a40}
+  .btn{background:var(--acc);color:#fff;border:none;border-radius:10px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.12s}
+  .btn:hover{filter:brightness(1.08)} .btn:active{transform:scale(.97)}
+  .btn.ghost{background:var(--panel2);border:1px solid var(--line2);color:var(--txt)}
+  .btn.gold{background:var(--gold);color:#1a1205} .btn.teal{background:var(--teal);color:#04140f}
+  .btn.bad{background:none;border:1px solid #6a2a2a;color:var(--bad)}
+  .btn.sm{padding:7px 12px;font-size:12px} .btn.full{width:100%} .btn.xs{padding:5px 9px;font-size:11px}
+  input,select,textarea{background:var(--panel2);border:1px solid var(--line2);color:var(--txt);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;width:100%}
+  input:focus,select,textarea:focus{outline:none;border-color:var(--acc)}
+  textarea{resize:vertical;min-height:64px}
+  label.fl{font-size:12px;color:var(--mut);display:block;margin:12px 0 6px;font-weight:600}
+  .muted{color:var(--mut);font-size:13px}
+  .dim{color:var(--dim)}
+  hr{border:none;border-top:1px solid var(--line2);margin:16px 0}
+  .task{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line2)}
+  .task:last-child{border-bottom:none}
+  .task input[type=checkbox]{width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:var(--ok);cursor:pointer}
+  .task label{flex:1;cursor:pointer;font-size:14px}
+  .task.done label{color:var(--dim);text-decoration:line-through}
+  .swipe{background:var(--panel2);border:1px solid var(--line2);border-radius:11px;padding:14px;margin-bottom:11px;position:relative}
+  .swipe .cat{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--gold);font-weight:800}
+  .swipe p{margin:6px 0 0;font-size:14px;white-space:pre-wrap}
+  .swipe .copy{position:absolute;top:12px;right:12px}
+  .acc{background:var(--panel2);border:1px solid var(--line2);border-radius:11px;margin-bottom:10px;overflow:hidden}
+  .acc summary{cursor:pointer;font-weight:700;font-size:14px;padding:14px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  .acc summary::-webkit-details-marker{display:none}
+  .acc summary::after{content:"+";color:var(--mut);font-size:18px}
+  .acc[open] summary::after{content:"−"}
+  .acc .body{padding:0 14px 14px;font-size:13.5px;color:#cdd5e4}
+  .acc .body p{margin:0 0 10px;white-space:pre-wrap}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--ok);color:#04140c;padding:11px 20px;border-radius:30px;font-weight:700;font-size:13px;z-index:150;opacity:0;transition:.25s;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+  .tag{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--panel2);border:1px solid var(--line2);color:var(--mut)}
+  .quote{font-style:italic;color:var(--mut);font-size:14px;border-left:3px solid var(--gold);padding-left:13px;margin:0}
+  .kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:720px){.kanban{grid-template-columns:1fr}}
+  .kcol{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:12px;min-height:120px}
+  .kcol h4{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);display:flex;justify-content:space-between}
+  .kcard{background:var(--panel);border:1px solid var(--line2);border-radius:9px;padding:10px;margin-bottom:8px;font-size:13px;cursor:grab}
+  .kcard .meta{display:flex;justify-content:space-between;align-items:center;margin-top:7px}
+  .inc-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line2);font-size:14px}
+  .inc-item:last-child{border-bottom:none}
+  .lead{background:var(--panel2);border:1px solid var(--line2);border-radius:11px;padding:13px;margin-bottom:10px}
+  .lead .nm{font-weight:700;font-size:14px}
+  .lead .st{font-size:11px;padding:2px 8px;border-radius:20px}
+  .st.yeni{background:#4f8cff22;color:var(--acc)} .st.arandi{background:#ffb54522;color:var(--gold)}
+  .st.toplanti{background:#b98cff22;color:var(--purple)} .st.kapandi{background:#36d39922;color:var(--ok)} .st.kayip{background:#f0636322;color:var(--bad)}
+  .note{background:var(--panel2);border:1px solid var(--line2);border-radius:11px;padding:13px;margin-bottom:10px;white-space:pre-wrap;font-size:14px}
+  .bars{display:flex;align-items:flex-end;gap:6px;height:90px;margin-top:20px}
+  .bars .b{flex:1;background:linear-gradient(180deg,var(--acc),var(--teal));border-radius:4px 4px 0 0;min-height:3px;position:relative}
+  .bars .b span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:9px;color:var(--mut)}
+  .callflow{counter-reset:step}
+  .callflow .s{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line2)}
+  .callflow .s:last-child{border:none}
+  .callflow .s .n{counter-increment:step;flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--panel2);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:var(--gold)}
+  .callflow .s .n::before{content:counter(step)}
+  .callflow .s .c b{color:var(--txt)} .callflow .s .c{font-size:13.5px;color:#cdd5e4}
+  .badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:#4f8cff18;color:var(--acc);border:1px solid #2a4a7a;margin-left:6px}
+
+  /* ---------- MOBILE NAV ---------- */
+  .mtop{display:none}
+  #mnav{display:none}
+  @media(max-width:860px){
+    aside{display:none}
+    main{padding:0 15px 90px;max-width:100%}
+    .mtop{display:flex;position:sticky;top:0;z-index:40;background:rgba(10,13,19,.94);backdrop-filter:blur(10px);
+      align-items:center;justify-content:space-between;padding:14px 4px calc(12px);margin:0 -15px 16px;padding-left:15px;padding-right:15px;border-bottom:1px solid var(--line2)}
+    .mtop .b{font-weight:800;font-size:16px;display:flex;align-items:center;gap:8px}
+    .mtop .b span{background:linear-gradient(90deg,var(--gold),var(--teal));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .mtop .b .d{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+    .topbar{margin-top:4px}
+    .topbar h1{font-size:19px}
+    #mnav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:60;background:rgba(20,26,38,.97);backdrop-filter:blur(12px);
+      border-top:1px solid var(--line2);padding:6px 2px calc(6px + env(safe-area-inset-bottom));overflow-x:auto}
+    #mnav button{flex:0 0 auto;min-width:62px;background:none;border:none;color:var(--mut);font-size:9.5px;padding:7px 4px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px}
+    #mnav button .ic{font-size:18px;line-height:1}
+    #mnav button.active{color:var(--acc)}
+    .kanban{grid-template-columns:1fr}
+  }
+  .sheet{position:fixed;inset:0;z-index:120;background:#0007;display:none;align-items:flex-end;justify-content:center}
+  .sheet.show{display:flex}
+  .sheet .inner{background:var(--panel);border:1px solid var(--line2);border-radius:18px 18px 0 0;width:100%;max-width:640px;max-height:88vh;overflow-y:auto;padding:20px}
+  @media(min-width:721px){.sheet{align-items:center}.sheet .inner{border-radius:18px}}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login">
+  <div class="box">
+    <div class="logo"><span>Evoris HQ</span></div>
+    <div class="tag">Komuta Merkezi · Mehmet & Hatice</div>
+    <div class="who" id="whoRow"></div>
+    <label class="fl">Şifre</label>
+    <input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <div style="margin-top:16px"><button class="btn full" onclick="doLogin()">Giriş Yap</button></div>
+    <p class="muted" style="text-align:center;margin:14px 0 0;font-size:11.5px">
+      İlk giriş — Mehmet: <b>mehmet2026</b> · Hatice: <b>hatice2026</b><br>Girişten sonra Ayarlar'dan değiştir.
+    </p>
+    <p id="loginErr" class="muted hidden" style="text-align:center;color:var(--bad);margin-top:10px"></p>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div class="app hidden" id="app">
+  <aside>
+    <div class="b"><span class="d"></span> <span>Evoris HQ</span></div>
+    <nav id="dnav"></nav>
+    <div class="foot">
+      <div class="whoami"><div class="av" id="wAv">M</div><div><div id="wName" style="color:var(--txt);font-weight:600">Mehmet</div><div id="wRole" style="font-size:11px">Kurucu · Admin</div></div></div>
+      <button class="btn ghost sm full" style="margin-top:8px" onclick="logout()">Çıkış</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="mtop">
+      <div class="b"><span class="d"></span> <span>Evoris HQ</span></div>
+      <div class="sync" id="syncPill2" onclick="pushNow()"><span class="d"></span><span id="syncTxt2">Yerel</span></div>
+    </div>
+
+    <div class="topbar">
+      <div>
+        <h1 id="vTitle">Komuta Merkezi</h1>
+        <div class="sub" id="vSub"></div>
+      </div>
+      <div class="sync" id="syncPill" onclick="pushNow()"><span class="d"></span><span id="syncTxt">Yerel mod</span></div>
+    </div>
+
+    <div id="views"></div>
+  </main>
+</div>
+
+<nav id="mnav"></nav>
+<div class="toast" id="toast"></div>
+<div class="sheet" id="sheet" onclick="if(event.target===this)closeSheet()"><div class="inner" id="sheetInner"></div></div>
+
+<script>
+/* ============================================================
+   EVORIS HQ — tek dosya komuta merkezi
+   Depolama: Supabase bulut (varsa) + localStorage yedek
+   ============================================================ */
+
+/* ---------- KULLANICILAR (varsayılan) ---------- */
+const DEFAULT_USERS = [
+  {id:"mehmet", name:"Mehmet", role:"Kurucu · Admin", admin:true, pass:"mehmet2026", av:"M"},
+  {id:"hatice", name:"Hatice", role:"Operasyon · Satış", admin:false, pass:"hatice2026", av:"H"}
+];
+
+/* ---------- VARSAYILAN DURUM ---------- */
+const DEFAULT = {
+  v:2,
+  startDate: todayStr(),
+  users: DEFAULT_USERS,
+  supabase:{url:"", key:""},
+  goals:{followX:0, followIG:0, followYT:0, subs:0, subPrice:400, mrr:0},
+  debt:{start:1000000, paid:0},
+  focus:{}, streak:0, lastDone:"",
+  tasksDone:{}, dayDone:{}, planDone:{},
+  income:[], expense:[],
+  content:[], leads:[], notes:[], meetings:[],
+  kanban:{todo:[],doing:[],done:[]},
+  customHooks:[],
+  updatedAt:0, updatedBy:""
+};
+
+let D = {...DEFAULT};
+let ME = null;
+let SB = null;             // supabase-lite client
+let syncState = "local";   // local | on | off | err
+let pushTimer = null;
+
+/* ---------- YARDIMCI ---------- */
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function yestStr(){const d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function nowMs(){return Date.now()}
+function fmt(n){return (Number(n)||0).toLocaleString("tr-TR")}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function daysSince(){const s=new Date(D.startDate);const n=new Date();return Math.max(1,Math.floor((n-s)/864e5)+1)}
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1500)}
+
+/* ---------- KALICILIK ---------- */
+function saveLocal(){localStorage.setItem("evorisHQ",JSON.stringify(D))}
+function loadLocal(){try{const r=JSON.parse(localStorage.getItem("evorisHQ"));if(r)D={...DEFAULT,...r,goals:{...DEFAULT.goals,...(r.goals||{})},debt:{...DEFAULT.debt,...(r.debt||{})},kanban:{...DEFAULT.kanban,...(r.kanban||{})},supabase:{...DEFAULT.supabase,...(r.supabase||{})}}}catch(e){}}
+
+function touch(){D.updatedAt=nowMs();D.updatedBy=ME?ME.id:"";}
+function save(){touch();saveLocal();schedulePush()}
+
+/* ---------- SUPABASE-LITE (REST, kütüphanesiz) ----------
+   Tek satırlık durum bloğu: tablo hq_state(id text pk, data jsonb, updated_at int8)
+------------------------------------------------------------- */
+function sbInit(){
+  const {url,key}=D.supabase||{};
+  if(url&&key){SB={url:url.replace(/\/+$/,""),key};return true}
+  SB=null;return false;
+}
+async function sbGet(){
+  if(!SB)return null;
+  const r=await fetch(SB.url+"/rest/v1/hq_state?id=eq.evoris&select=data,updated_at",{
+    headers:{apikey:SB.key,Authorization:"Bearer "+SB.key}});
+  if(!r.ok)throw new Error("GET "+r.status);
+  const j=await r.json();return j&&j[0]?j[0]:null;
+}
+async function sbPut(){
+  if(!SB)return;
+  const body=[{id:"evoris",data:D,updated_at:D.updatedAt}];
+  const r=await fetch(SB.url+"/rest/v1/hq_state?on_conflict=id",{
+    method:"POST",
+    headers:{apikey:SB.key,Authorization:"Bearer "+SB.key,"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},
+    body:JSON.stringify(body)});
+  if(!r.ok)throw new Error("PUT "+r.status);
+}
+function setSync(s){syncState=s;document.querySelectorAll("#syncPill,#syncPill2").forEach(p=>{p.className="sync "+(s==="on"?"on":s==="err"?"err":s==="off"?"off":"");});
+  const txt=s==="on"?"Bulut · eşitlendi":s==="err"?"Bulut hatası":s==="off"?"Çevrimdışı":"Yerel mod";
+  const t1=document.getElementById("syncTxt"),t2=document.getElementById("syncTxt2");if(t1)t1.textContent=txt;if(t2)t2.textContent=s==="on"?"Bulut":s==="err"?"Hata":s==="off"?"Offline":"Yerel";}
+
+async function initialSync(){
+  if(!sbInit()){setSync("local");return}
+  try{
+    const remote=await sbGet();
+    if(remote&&remote.data){
+      const rd=remote.data;
+      // en güncel kazanır
+      if((rd.updatedAt||0) >= (D.updatedAt||0)){
+        const keepSb=D.supabase; // yerel supabase anahtarını koru
+        D={...DEFAULT,...rd,supabase:keepSb.url?keepSb:rd.supabase};
+        saveLocal();
+      }else{
+        await sbPut();
+      }
+    }else{
+      await sbPut();
+    }
+    setSync("on");renderAll();
+  }catch(e){setSync("err");}
+}
+function schedulePush(){
+  if(!SB){setSync("local");return}
+  clearTimeout(pushTimer);
+  pushTimer=setTimeout(pushNow,900);
+}
+async function pushNow(){
+  if(!SB){setSync("local");return}
+  try{
+    // önce uzaktan çek: karşı taraf daha yeniyse birleştir (basit son-yazan-kazanır güvenliği)
+    const remote=await sbGet();
+    if(remote&&remote.data&&(remote.data.updatedAt||0)>(D.updatedAt||0)){
+      const keepSb=D.supabase;D={...DEFAULT,...remote.data,supabase:keepSb};saveLocal();renderAll();toast("Ortaktan yeni veri geldi ↺");setSync("on");return;
+    }
+    await sbPut();setSync("on");
+  }catch(e){setSync("err")}
+}
+
+/* ============================================================
+   İÇERİK CEPHANELİĞİ (gömülü veri)
+   ============================================================ */
+
+/* ---- 90 GÜNLÜK YOL HARİTASI (sütun etiketli) ---- */
+const ROADMAP=[
+ {faz:"FAZ 0 · HAZIRLIK", cls:"p-sistem", title:"Temeli Kur — Gün 1-7", sub:"Sistem kurulur, henüz para beklenmez",
+  tasks:[
+   ["p-sistem","Bu paneli GitHub Pages'e yükle + Supabase'e bağla (kurulum rehberi PDF)"],
+   ["p-sistem","Evoris marka kiti: logo/renk, tek cümlelik vaat, 3 kanal bio'su hazır"],
+   ["p-ajans","WhatsApp/AI asistan hizmet paketini + fiyat listesini + sözleşmeyi finalize et"],
+   ["p-ajans","Hatice için arama listesi kaynaklarını belirle (küçük işletmeler: kuaför, klinik, emlak, kafe)"],
+   ["p-x","X hesabını kripto nişine göre yeniden konumla; 15 tweet'lik ilk stoğu hazırla"],
+   ["p-youtube","2 YouTube nişini seç (İngilizce, faceless) + kanal isimleri + ilk 5 başlık"],
+   ["p-insta","Instagram bio + öne çıkanlar + ilk 10 reels hook'u seçildi"],
+   ["p-egitim","Uzman Eğitmen sertifikanla satabileceğin ilk mini eğitimin başlığını netleştir"]
+ ]},
+ {faz:"FAZ 1 · NAKİT", cls:"p-ajans", title:"İlk Para — Gün 8-30", sub:"Ajans + satış: en hızlı nakit buradan",
+  tasks:[
+   ["p-ajans","Hatice günde 15-20 işletme arasın (script panelde: Satış sekmesi)"],
+   ["p-ajans","Haftada 5+ tanıtım toplantısı (online/yüzyüze) ayarla"],
+   ["p-ajans","İlk 2-3 müşteriyi kapat: WhatsApp AI asistan kurulumu (900-2500₺ kurulum + aylık bakım)"],
+   ["p-ajans","Her kapanan işi CRM'e işle, referans/yorum iste"],
+   ["p-x","X'te günde 3-5 otomatik+manuel tweet; ilk 500 takipçi"],
+   ["p-insta","Haftada 4 reels (gelişim/öz-değer) + günlük story"],
+   ["p-youtube","İlk 4 video yayınla (haftada 1-2), 8+ dk, İngilizce"],
+   ["p-sistem","Hedef Ay 1: 30.000-80.000₺ nakit + geçim güvence altında"]
+ ]},
+ {faz:"FAZ 2 · TEKRAR", cls:"p-egitim", title:"Katman Ekle — Gün 31-60", sub:"Tekrarlayan gelir + eğitim + abonelik",
+  tasks:[
+   ["p-ajans","Ajans müşterilerini aylık bakım aboneliğine geçir (tekrarlayan gelir)"],
+   ["p-egitim","İlk mini eğitimi çek + yasal olarak yayınla/sat (Gumroad/kendi sayfan)"],
+   ["p-x","X premium/abonelik veya özel kanal aç: kripto analiz + topluluk (299-499₺/ay)"],
+   ["p-youtube","YouTube 2. niş kanalını aç; ilk kanalda 12+ video biriktir (monetizasyon eşiği)"],
+   ["p-insta","Instagram'dan bedava Telegram'a, oradan ücretli topluluğa huni kur"],
+   ["p-ajans","Hatice haftada 8-10 toplantı; kapanış oranını ölç ve script'i iyileştir"],
+   ["p-sistem","Hedef Ay 2-3: 150.000-300.000₺ (nakit + tekrarlayan üst üste binmeye başlar)"]
+ ]},
+ {faz:"FAZ 3 · ÖLÇEK", cls:"p-sistem", title:"Sistemleştir — Gün 61-90", sub:"Otomatikleştir, ekip ekle, üst üste bindir",
+  tasks:[
+   ["p-ajans","İlk çalışanı/part-time satışçıyı panele ekle (admin: Ekip sekmesi)"],
+   ["p-egitim","2. eğitimi çıkar; eğitim setini paketle (upsell merdiveni)"],
+   ["p-youtube","İçerikleri batch çek (tek oturumda 5-7 video); yükleme takvimini otomatikleştir"],
+   ["p-x","En iyi tweet formatlarını şablona çevir; abonelik sayısını 2-3x yap"],
+   ["p-ajans","Ajansta hizmet menüsünü genişlet (web, otomasyon, içerik) + fiyatları yükselt"],
+   ["p-sistem","90 günü gözden geçir: neyi tekrarla, neyi bırak; Ay 4-12 için hedefleri yükselt"],
+   ["p-sistem","Hedef Ay 6-12: tekrarlayan gelirleri üst üste bindirerek 700.000-1.5M+₺"]
+ ]}
+];
+
+const DAYPLAN=[
+ "🎯 15 dk — Bugünün TEK önceliğini belirle (herkes kendi rolünde)",
+ "📞 60 dk — Hatice: arama bloğu (15-20 işletme) / Mehmet: kapanış & toplantı",
+ "✍️ 45 dk — İçerik: 1-2 reels script + günün tweet'leri (Claude ile)",
+ "🎬 30 dk — Çekim / story / YouTube seslendirme-montaj kuyruğu",
+ "💬 30 dk — DM + yorum + müşteri takibi (güven kurar, satışı hazırlar)",
+ "📊 10 dk — Sayıları gir (Para + CRM), 1 içerik analizi",
+ "🌙 Kapanış — Yarının tek işini not et, borç barını güncelle, kapat"
+];
+
+/* ---- HOOK / SCRIPT KÜTÜPHANESİ ---- */
+const HOOKS=[
+ {cat:"İnstagram · Öz-değer",t:"Değerin cüzdanınla ölçülüyorsa sorun kadın değil — tek değerinin cüzdanın olması. Onu değiştirmenin yolu şu:"},
+ {cat:"İnstagram · Ajans",t:"Seçilen değil, SEÇEN taraf ol. Bu bir laf değil; kendi gelirini ve becerini inşa etmekle başlayan bir sistem."},
+ {cat:"İnstagram · Sistem",t:"Günde 2 saatin mi var? Yeter. O 2 saatte sıfırdan gelir kurmanın adımları:"},
+ {cat:"İnstagram · Sert gerçek",t:"3 ay sonra ya bahanelerin olacak ya sonuçların. İkisi aynı anda olmuyor."},
+ {cat:"X · Kripto giriş",t:"Kripto'da para kaybedenlerin %90'ı aynı hatayı yapıyor. İşte o hata ve kaçınma yolu 🧵"},
+ {cat:"X · Risk",t:"Maaşına mahkûm olmak istemiyorsan paranın nasıl çalıştığını öğrenmen şart. Sıfırdan başlayanın 5 adımı 🧵"},
+ {cat:"X · Piyasa",t:"Herkes fiyatı konuşuyor, kimse riski konuşmuyor. Portföyünü koruyan 3 kural:"},
+ {cat:"YouTube · Başlık",t:"How I'd Build a $10k/Month Business From Zero in 2026 (Realistic Plan)"},
+ {cat:"YouTube · Başlık",t:"5 AI Tools That Replace a Whole Marketing Team (Free & Cheap)"},
+ {cat:"Ajans · Soğuk açılış",t:"Merhaba [isim], [sektör] işletmelerine WhatsApp'ta müşteri sorularını 7/24 otomatik yanıtlayan bir asistan kuruyoruz — kaçan müşteriyi geri kazandırıyor. 2 dakikanız var mı?"}
+];
+
+const PROMPTS=[
+ {t:"7 günlük içerik planı",d:"Tüm kanallar için haftalık plan",p:"Sen Evoris'in içerik stratejistisin. Kanallar: Instagram (erkek gelişimi/öz-değer, TR), X (kripto eğitimi, TR), YouTube (faceless, İngilizce, iş/AI/finans). Bu hafta için kanal kanal 7 günlük içerik planı çıkar: her gün için konu + hook + 3 maddelik özet + tek CTA. Ton: gerçek, yapıcı, ajans odaklı; abartı/kazanç vaadi yok."},
+ {t:"Reels script (30-60sn)",d:"Hook'tan tam metin",p:"Şu hook'tan 30-60 sn Instagram reels script'i yaz: [HOOK]. Yapı: hook (2sn) → gerçek problem → dönüm → 3 somut adım → güçlü kapanış + CTA (bedava Telegram). Konuşma dili, kameraya anlatır gibi, Türkçe."},
+ {t:"X thread (kripto eğitim)",d:"Tavsiye değil, eğitim",p:"Kripto konusunda EĞİTİCİ (yatırım tavsiyesi DEĞİL) bir X thread'i yaz: [ALT KONU]. 7-9 tweet. İlk tweet çengel, son tweet takip+abonelik CTA. Her yerde 'kendi araştırmanı yap' çerçevesi. Abartı yok, sakin güven veren ton, Türkçe."},
+ {t:"YouTube video script (8+dk)",d:"İngilizce, faceless",p:"Write a faceless YouTube video script in ENGLISH, 8-10 minutes, on: [TOPIC], for niche [NICHE]. Structure: strong 15-sec hook, promise, 4-6 value sections with concrete examples, a mid-roll retention hook, and a CTA to subscribe. Conversational voiceover style. Add on-screen text cues in [brackets]."},
+ {t:"Ajans satış maili/DM",d:"Soğuk erişim",p:"Evoris için soğuk erişim mesajı yaz. Hizmet: küçük işletmelere WhatsApp AI müşteri asistanı (7/24 yanıt, randevu, sık soruları otomatik). Hedef: [SEKTÖR]. Kısa, faydayı somut göster (kaçan müşteriyi kurtarır), tek net CTA: 15 dk tanıtım görüşmesi. 3 varyant üret."},
+ {t:"İtiraz karşılama",d:"Satışta 'pahalı/düşüneyim'",p:"Bir müşteri şu itirazı yaptı: '[İTİRAZ]'. Evoris WhatsApp AI asistan satışında bunu değer üzerinden, baskı yapmadan karşılayan 3 farklı cevap yaz. Müşteriyi haklı çıkar, sonra çerçeveyi kaçan-müşteri-maliyetine çevir. Türkçe, samimi, güçlü."},
+ {t:"Mini eğitim müfredatı",d:"Yasal, kendi eğitimin",p:"Uzman Eğitmen olarak yasal satabileceğim bir mini eğitim müfredatı çıkar: konu [KONU], hedef kitle [KİTLE]. 6-8 modül, her modül için: öğrenim çıktısı, 3-5 alt başlık, uygulama görevi. Sonunda sertifika/oturum planı. Türkçe."},
+ {t:"Haftalık önceliklendirme",d:"Az vakti planla",p:"Bu hafta yapılacaklar: [LİSTE]. Mehmet gündüz çalışıyor, akşam 2-3 saat müsait; Hatice gündüz arama/toplantı yapabiliyor. Etki/efora göre sırala, iki kişiye rol bazlı gerçekçi haftalık plan çıkar. Odak: nakit önce."}
+];
+
+/* ---- YOUTUBE NİŞLERİ (İngilizce, faceless, 8+dk) ---- */
+const YT_NICHES=[
+ {name:"AI & Automation for Business", tag:"Yüksek RPM · sürdürülebilir",
+  why:"İş sahipleri ve serbest çalışanlar AI ile zaman/para kazanmak istiyor. Reklam geliri (RPM) yüksek, içerik senin ajans işini de besliyor (aynı bilgi, iki gelir).",
+  titles:["5 AI Tools That Replace a Whole Marketing Team","How to Automate Your Small Business With AI (Step by Step)","I Built a Customer Service Bot in 20 Minutes — Here's How","AI Side Hustles That Actually Make Money in 2026","ChatGPT vs Claude for Business: Real Test"],
+  format:"Ekran kaydı + voiceover + basit b-roll. Yüz gerekmez. Claude script yazar, ElevenLabs/kendi sesin seslendirir."},
+ {name:"Personal Finance & Wealth (Beginner)", tag:"Dev kitle · yüksek RPM",
+  why:"Finans nişi en yüksek reklam getirisi olan alanlardan. Genç erkek kitlesi seninle örtüşüyor; X ve Instagram içeriğinle çapraz besler.",
+  titles:["How I'd Invest My First $1000 in 2026","7 Money Habits That Quietly Make You Broke","The Simple Budget That Actually Works","Compound Interest Explained Like You're 5","Why Most People Never Get Rich (Hard Truth)"],
+  format:"Animasyonlu metin + stok görsel + voiceover. Tavsiye değil, eğitim çerçevesi."},
+ {name:"Discipline & Self-Improvement (Men)", tag:"Viral potansiyel",
+  why:"Instagram'daki öz-değer/ajans içeriğinin İngilizce, uzun-form hali. Aynı mesaj, global kitle, YouTube reklam geliri.",
+  titles:["The 2-Hour Rule That Changes Broke Men's Lives","How to Rebuild Yourself After Hitting Rock Bottom","Stop Chasing Motivation — Build This System Instead","Why Discipline Beats Talent Every Time","5 Habits of Men Who Never Stay Broke"],
+  format:"Sinematik stok video + güçlü voiceover + altyazı. Duygusal, yapıcı ton."},
+ {name:"Crypto Education (No Hype)", tag:"Niş ama sadık kitle",
+  why:"X kripto içeriğinin video versiyonu. 'Hype yok, eğitim var' konumu güven kazandırır ve abonelik/topluluğa besler.",
+  titles:["Crypto Risk Management for Beginners (No Hype)","How to Not Lose Money in Crypto — 5 Rules","Explained: What Actually Moves the Market","Dollar Cost Averaging vs Timing — The Data","Building a Crypto Portfolio From $0"],
+  format:"Grafik/tablo + voiceover. Her videoda 'not financial advice' çerçevesi."}
+];
+const YT_SCRIPT_TEMPLATE=`YAPI (8-10 dk faceless video):
+[0:00-0:15] HOOK — İzleyicinin acısını/merakını ilk 15 saniyede vur. Vaadi söyle ("Bu videonun sonunda X'i bileceksin").
+[0:15-0:45] KİMLİK & VAAT — Neden dinlemeli, ne kazanacak.
+[0:45-6:30] 4-6 DEĞER BÖLÜMÜ — Her bölüm: iddia → örnek → uygulama. Ortada 1 retention hook ("Ama asıl önemlisi şimdi geliyor").
+[6:30-8:00] ÖZET & CTA — 3 maddede topла, abone ol + bir sonraki video.
+KURAL: İngilizce, konuşma dili. Claude'a 'YouTube video script (8+dk)' prompt'unu ver → seslendir → ekran/stok görselle montaj.`;
+
+/* ---- X (TWITTER) İÇERİK & OTOMASYON ---- */
+const X_KIT={
+ templates:[
+  "🧵 [KONU] hakkında kimsenin söylemediği 5 şey:",
+  "Kripto'ya yeni başlayan biri şu 3 hatayı yapıyor:\n\n1)\n2)\n3)\n\nKaçınırsan yarı yolu geçtin.",
+  "Zengin olmak değil, FAKİR KALMAMAK bir beceridir. İşte temel kurallar 👇",
+  "Herkes fiyat grafiğine bakıyor. Ben şuna bakıyorum: [metrik]. Sebebi:",
+  "Bugün öğrendiğim 1 şey (kısa):",
+  "Portföyünü mahveden 4 duygu:\n\nAçgözlülük • Korku • FOMO • İntikam\n\nHer birinin panzehiri 🧵"
+ ],
+ automation:"OTOMASYON (ücretsiz/ucuz): Claude ile haftada 1 kez 15-20 tweet üret → bir zamanlama aracına (ör. günlük ücretsiz kotası olan bir planlayıcı, ya da n8n + X API) yükle → günde 3-5 otomatik paylaşım. Manuel katman: günde 20 dk büyük hesaplara anlamlı yanıt (asıl büyüme buradan gelir). /crypto-tweet skill'i doğrulanmış haberden günlük tweet paketi üretir.",
+ sub:"ABONELİK: Yeterli güven + kitle oluşunca X aboneliği veya özel kanal (kripto analiz + topluluk). Fiyat 299-499₺/ay. Değeri somut göster: 'haftalık analiz + soru-cevap + topluluk'. Kazanç vaadi değil, süreç ve disiplin sat."
+};
+
+/* ============================================================
+   90 GÜNLÜK GÜN-GÜN İÇERİK PLANI (13 hafta)
+   IG = Instagram reels (TR, gelişim) · X = kripto eğitim (TR)
+   YT = faceless İngilizce video. Tarihler başlangıç tarihinden hesaplanır.
+   ============================================================ */
+const WEEKS=[
+ {n:1,theme:"Kuruluş & kimlik",ig:["Neden çoğu erkek 30'unda hâlâ sıfırda? 3 sebep","'Param yok' deme, 'henüz yok' de — fark her şeyi değiştirir","İş çıkışı o 2 saat bir servet değerinde. Nasıl kullanılır?"],x:["Kripto'ya başlamadan bilmen gereken 5 temel kavram","Cüzdan, borsa, private key: sıfırdan mini sözlük"],yt:"How I'd Start From Zero in 2026 (No Money, Just a Laptop)"},
+ {n:2,theme:"Öz-değer",ig:["Değerini cüzdanınla ölçen kadın değil, sensin. Değiştir.","ATM olmaktan 'seçen taraf' olmaya: 3 adım","Kendine yatırım yapmayan erkek başkasının planında figürandır"],x:["Fakir kalmak değil, fakir DÜŞÜNMEK bir alışkanlıktır","İlk paranı korumanın 3 kuralı (risk 101)"],yt:"The 2-Hour Rule That Quietly Changes Broke Men's Lives"},
+ {n:3,theme:"Sistem > motivasyon",ig:["Motivasyon seni kandırır, sistem kazandırır. Kur şunu:","Günde 2 saatte sıfırdan gelir: gerçekçi plan","3 ay sonra ya bahanelerin olacak ya sonuçların"],x:["Portföyünü koruyan 3 kural (kaybetmemek bir beceridir)","DCA nedir, neden duyguyu öldürür?"],yt:"Stop Chasing Motivation — Build This System Instead"},
+ {n:4,theme:"Para psikolojisi",ig:["Zengin görünmeye çalışan fakir kalır. Zengin OLAN şunu yapar:","Küçük kazanç = nefes. İlk küçük zaferini nasıl kazanırsın","Harcama değil, kural eksikliği seni batırır"],x:["Paranı sessizce eriten 7 alışkanlık","Bileşik getiri: 5 yaşındaki birine anlatır gibi"],yt:"7 Money Habits That Quietly Keep You Broke"},
+ {n:5,theme:"Disiplin",ig:["Disiplin yetenekten her zaman güçlüdür. Kanıtı:","Dibe vurduysan seni çıkaran tek alışkanlık şu:","Erteleme bir zaman sorunu değil, duygu sorunu"],x:["Kripto'da para kaybedenlerin %90'ının yaptığı 1 hata","Piyasayı okumak değil, kendini yönetmek kazandırır"],yt:"Why Discipline Beats Talent Every Single Time"},
+ {n:6,theme:"İlişkide değer",ig:["İlişkide hep veren sensin? Sorun cömertlik değil, sınır yokluğu","Muhtaç görünmek çeker mi iter mi? Gerçek şu:","Değerli erkek yalvarmaz, çünkü seçenekleri vardır"],x:["FOMO'yu yenmenin pratik yolu","Risk yönetimi: pozisyon büyüklüğü neden her şeydir"],yt:"How to Build Real Self-Worth as a Man (No Fluff)"},
+ {n:7,theme:"Odak & sadelik",ig:["Her şeyi yapmaya çalışan hiçbir şeyi bitiremez","Tek kitle, tek ritim, tek teklif. Odak süper güç","Telefonun dikkatini çalıyor, hayatını değil — geri al"],x:["Basit bir portföyün karmaşık olandan üstün olmasının sebebi","Haber değil, sabır kazandırır — neden?"],yt:"The Power of Focus: One Goal Beats Ten"},
+ {n:8,theme:"Korku & cesaret",ig:["Kaybetme korkusu kazanma isteğinden güçlüdür. Kullan onu.","Herkes hazır olmayı bekliyor. Hazır olma diye bir an yok.","İlk adımı atmak, mükemmel planı beklemekten iyidir"],x:["Kayıp kaçınması: beynin neden seni kötü karar verdiriyor","Duygusal alım-satımın panzehiri: yazılı kurallar"],yt:"Why Most People Never Get Rich (Hard Truth)"},
+ {n:9,theme:"Kimlik inşası",ig:["Yaptığın değil, tekrar ettiğin şeysin. Alışkanlık = kimlik","Çevren gelirini belirler. Yanlış masadan kalk.","Bir yıl sonra bugünü ya kutlayacaksın ya pişman olacaksın"],x:["Uzun vadeli düşünmenin matematiksel gücü","Kripto'da 'ucuz' ve 'değerli' aynı şey değil"],yt:"You Become What You Repeat: The Identity Shift"},
+ {n:10,theme:"Üretim & değer",ig:["Tüketmeyi bırak, üretmeye başla. İlk ürünün ne olabilir?","İnsanların bir sorununu çöz, para peşinden gelir","Beceri satılır, şikayet satılmaz"],x:["Değer yatırımı vs spekülasyon: fark","Bir varlığı araştırırken sorman gereken 5 soru"],yt:"Turn Skills Into Income: The Simple Framework"},
+ {n:11,theme:"Dayanıklılık",ig:["Herkes başlar, azınlık devam eder. Fark burada.","Başarısızlık son değil, veri. Neyi öğrendin?","Sabır bir erdem değil, bir stratejidir"],x:["Ayı piyasasında ne yapılır, ne yapılmaz","Sabit yatırım disiplininin 3 yıllık etkisi"],yt:"How to Keep Going When You Want to Quit"},
+ {n:12,theme:"Topluluk & otorite",ig:["Yalnız hızlı gidersin, birlikte uzağa. Doğru masayı kur.","Öğret ki öğrenesin. Bildiğini paylaş, otoriten büyür.","İnsanlar ürünü değil, dönüşümü satın alır"],x:["Neden bir toplulukta öğrenmek yalnız öğrenmekten hızlı","Kripto'da bilgi kaynaklarını nasıl süzersin"],yt:"Build Authority by Teaching What You Know"},
+ {n:13,theme:"Ölçek & gelecek",ig:["90 günde ne değişti? Geriye bak, ileriye planla.","Bir kez kazandığın şeyi sistemleştir, tekrarla","Sıradaki seviyeye geçmek eskiyi bırakmakla başlar"],x:["90 günde öğrendiğim en önemli 5 finans dersi","Sürdürülebilir büyüme: yavaş ama bileşik"],yt:"90 Days In: What Actually Moved the Needle"}
+];
+
+/* Günlük kısa tweet havuzu (hazır, kopyala-yapıştır, tavsiye değil) */
+const DAILY_TWEETS=[
+ "Portföyünü mahveden 4 duygu: açgözlülük, korku, FOMO, intikam. Panzehiri tek: yazılı bir plan.",
+ "Kripto'da asıl beceri almak değil — ne zaman DOKUNMAMAK gerektiğini bilmek.",
+ "Fiyatı herkes konuşuyor. Kazananlar riski konuşuyor.",
+ "Kaybetmeyi göze alamayacağın parayla yatırım yapmak, yatırım değil kumardır.",
+ "Zengin olmak değil, fakir KALMAMAK bir beceridir. Ve öğrenilebilir.",
+ "Bugün 1 saat öğrenmek, yarın 1 yıl pişmanlıktan ucuzdur.",
+ "Piyasa senin sabrını test eder, zekânı değil.",
+ "Her yükselişte alan, her düşüşte satan kaybeder. Tersi disiplin ister.",
+ "Bir varlığı anlamadan almak, haritasız yola çıkmaktır.",
+ "Küçük ve düzenli > büyük ve düzensiz. Bileşik etki sessiz ama acımasız.",
+ "Haber senin düşmanın değil, aceleciliğin düşmanın.",
+ "Cüzdanını koru: private key'ini kimseyle paylaşma, kimse. Nokta.",
+ "En pahalı ders: 'bu sefer farklı' demek.",
+ "Plan yoksa duygu yönetir. Duygu yönetirse hesap boşalır.",
+ "Sabır bir erdem değil, bir stratejidir.",
+ "Gelirinin bir kısmını kendine öde — önce, sonra değil.",
+ "Kaldıraç kazancı büyütür, ama önce hatanı büyütür. Acele etme.",
+ "Bilmediğin bir şeye 'ucuz' diye girme. Ucuz, daha da ucuzlayabilir.",
+ "Uzun vade düşünenler, kısa vade panik yapanlardan para alır.",
+ "Disiplin: kimse bakmazken doğru olanı yapmak.",
+ "Bir günde zengin eden her şey, bir günde fakir de eder.",
+ "Kendine yatırım her zaman en yüksek getirili yatırımdır.",
+ "Kural: asla tek bir şeye her şeyini koyma.",
+ "Korku ve açgözlülük arasında bir yerde, plan seni ayakta tutar.",
+ "Bugünün küçük tutarlılığı, yılın büyük farkıdır.",
+ "Kazanmak kadar kaybı sınırlamak da beceridir. Aslında daha önemlisi.",
+ "Herkesin heyecanlandığı an, dikkatli olma anıdır.",
+ "Basit bir sistemi yıllarca sürdürmek, karmaşık olanı bir ay yapmaktan iyidir.",
+ "Parayı yöneten duyguyu yönetir. Önce kendini eğit.",
+ "En iyi zaman öğrenmeye dün başlamaktı. İkincisi bugün."
+];
+
+/* Haftanın günü → o gün hangi kanal(lar) */
+const WEEKDAY_PLAN={
+ 1:["ig","x"], 2:["x"], 3:["yt","x"], 4:["ig","x"], 5:["x"], 6:["ig","x"], 0:["yt","x"]
+};
+const GUN_ADI=["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
+
+function buildDay(off){ // off = 1..90
+  const d=new Date(D.startDate); d.setDate(d.getDate()+(off-1));
+  const wkIdx=Math.min(12,Math.floor((off-1)/7));
+  const wk=WEEKS[wkIdx];
+  const dow=d.getDay();
+  const chans=WEEKDAY_PLAN[dow]||["x"];
+  const items=[];
+  // rotasyon: hafta içindeki gün sırasına göre konu seç
+  const posInWeek=(off-1)%7;
+  chans.forEach(c=>{
+    if(c==="ig") items.push({c:"ig",label:"Instagram Reels",text:wk.ig[posInWeek%wk.ig.length]});
+    if(c==="yt") items.push({c:"yt",label:"YouTube (EN)",text:wk.yt});
+    if(c==="x"){
+      const thread=wk.x[posInWeek%wk.x.length];
+      items.push({c:"x",label:"X · Thread konusu",text:thread});
+      items.push({c:"x",label:"X · Günlük tweet (hazır)",text:DAILY_TWEETS[(off-1)%DAILY_TWEETS.length],ready:true});
+    }
+  });
+  return {off,date:d,dow,wk:wkIdx+1,theme:wk.theme,items};
+}
+function planTodayOffset(){const s=new Date(D.startDate);const n=new Date();const off=Math.floor((n-s)/864e5)+1;return off;}
+
+/* ---- SATIŞ & İKNA (telefon + yüzyüze) ---- */
+const CALL_SCRIPT=[
+ {c:"<b>Açılış (pattern interrupt):</b> \"Merhaba [isim], ben Hatice — Evoris'ten arıyorum. 30 saniyenizi rica etsem, sonra kapatmamı isterseniz kapatırım, olur mu?\" — İzin isteme direnci düşürür."},
+ {c:"<b>Çengel (acı noktası):</b> \"[Sektör] işletmelerinde en çok şunu duyuyoruz: mesai dışı gelen WhatsApp/DM mesajları cevapsız kalıyor ve o müşteri rakibe gidiyor. Sizde de oluyor mu bu?\" — Onların sorununu onlara söylet."},
+ {c:"<b>Köprü:</b> \"Biz tam bunu çözüyoruz: WhatsApp'ınıza 7/24 çalışan, sık soruları yanıtlayan, randevu alan bir AI asistan kuruyoruz. Siz uyurken bile müşteriyi karşılıyor.\""},
+ {c:"<b>Kanıt/çerçeve:</b> \"Ortalama bir işletme ayda [X] mesajı kaçırıyor; birkaç müşteri bile kurulum maliyetini fazlasıyla çıkarıyor.\" — Maliyeti 'kayıp müşteri'ye çevir."},
+ {c:"<b>Mikro-evet + kapanış:</b> \"Size 15 dakikalık kısa bir tanıtım ayarlayayım, canlı gösterelim; beğenmezseniz bir yükümlülüğünüz yok. Yarın 14:00 mü yoksa 16:00 mı iyi?\" — Alternatif kapanış (evet/hayır değil, saat seç)."},
+ {c:"<b>Kapatırken:</b> Toplantıyı CRM'e işle, WhatsApp'tan tek cümlelik teyit + takvim linki gönder. Randevuya gelme oranını takip et."}
+];
+const MEETING_FLOW=[
+ {c:"<b>Isınma (2 dk):</b> İşini övdür — 'İşinizi nasıl büyüttünüz?' İnsan konuşurken güven kurulur; sen dinle, not al."},
+ {c:"<b>Keşif (asıl güç burada):</b> Sorularla acıyı BÜYÜT: 'Mesai dışı kaç mesaj geliyor? Kaçını cevaplayamıyorsunuz? Bir müşteri ortalama ne kadar ettiriyor?' — Rakamı O söylesin, sen değil."},
+ {c:"<b>Yeniden çerçeveleme:</b> 'Yani ayda ~[X] potansiyel müşteri cevapsız kalıyor. Yılda bu [Y] eder.' — Problemi parasal büyüklüğe çevir, sonra çöz."},
+ {c:"<b>Canlı gösterim:</b> Telefonundan asistanı canlı göster. Görmek > anlatmak."},
+ {c:"<b>Paket & fiyat (çapa):</b> Önce en kapsamlı paketi söyle (çapa), sonra orta paketi öner — orta paket ucuz görünür. 'Çoğu işletme şu ortadakini seçiyor.'"},
+ {c:"<b>Kapanış:</b> 'Bugün başlarsak bu haftaya kurulur. Kurulum + ilk ay mı, yoksa 3 aylık avantajlı paket mi?' — Evet varsayımlı, iki seçenekli kapanış."}
+];
+const PERSUASION=[
+ {t:"Karşılıklılık (Reciprocity)",d:"Önce ücretsiz değer ver: mini denetim, 3 hazır otomatik cevap örneği, kısa rapor. İnsan karşılığında borçluluk hisseder ve daha kolay 'evet' der."},
+ {t:"Sosyal kanıt",d:"'[Benzer işletme] bunu kullanıyor', ekran görüntüsü, yorum. İnsanlar kendileri gibi olanların yaptığını yapar. İlk müşterilerden mutlaka referans/video yorum al."},
+ {t:"Kıtlık & aciliyet (dürüst)",d:"'Bu ay 5 kurulum kontenjanımız var' — YALNIZCA gerçekse. Sahte kıtlık güveni öldürür; gerçek kıtlık kararı hızlandırır."},
+ {t:"Çapa (anchoring)",d:"Yüksek paketi önce söyle; sonraki her şey ucuz görünür. Fiyatı asla ilk cümlede verme — önce değeri kur."},
+ {t:"Kayıp kaçınması",d:"İnsan kazanmaktan çok kaybetmekten korkar. 'Kaçan müşteri' çerçevesi 'yeni özellik' çerçevesinden güçlüdür."},
+ {t:"Muhtaç görünme — tersine çevir",d:"Sen satmaya muhtaç değilsin; ONUN sorununu çözüyorsun. 'Uygun değilse sorun değil, herkese uymuyor' de. Bu duruş talebi artırır. Kovalarsan kaçar; seçici durursan gelir."},
+ {t:"Küçük evetler (tie-downs)",d:"'Mantıklı değil mi?', 'Bu size de olur muydu?' — Küçük onaylar büyük evete zemin hazırlar."},
+ {t:"Etik sınır",d:"Manipülasyon değil, DEĞER + netlik. Gerçek fayda satarsan müşteri kalır, referans verir; kandırırsan bir kez satar, itibarını kaybedersin. Uzun oyunu oyna."}
+];
+
+const QUOTES=[
+ "Küçük ve hızlı bir kazanç, sizin durumunuzda sadece para değil — nefes demek.",
+ "Borç bir sayı. Her kapanan iş o sayıyı küçültür. Bugün küçült.",
+ "Mehmet kapatır, Claude üretir, Hatice yürütür. Sistem bu.",
+ "Odak süper güç: tek kitle değil ama tek RİTİM — her gün aynı blok.",
+ "Kovalarsan kaçar. Değer verip seçici durursan gelir.",
+ "Bahaneler mi sonuçlar mı? İkisi aynı anda olmaz.",
+ "Sahte zenginlik denizinde tek gerçek sizsiniz. Gerçek olan kazanır.",
+ "9350 kişi seni zaten dinliyor. Sıfırdan başlamıyorsun.",
+ "Bugün yapacağın TEK iş ne? Onu bitir, gerisi yarın.",
+ "Muhtaç değilsin; onun problemini çözüyorsun. Duruşun bu olsun."
+];
+
+/* ============================================================
+   MENÜ & GÖRÜNÜMLER
+   ============================================================ */
+const MENU=[
+ {id:"home", ic:"🏠", t:"Komuta Merkezi", sub:"Genel durum ve bugünün odağı"},
+ {id:"map", ic:"🗺️", t:"90 Günlük Yol", sub:"Faz faz görev listesi"},
+ {id:"day", ic:"⏱️", t:"Günlük Ritim", sub:"Her gün aynı 2-3 saatlik blok"},
+ {id:"plan", ic:"📆", t:"90 Günlük Plan", sub:"Gün gün ne paylaşılacak (IG·X·YT)"},
+ {id:"content", ic:"📅", t:"İçerik Kaydı", sub:"Kendi eklediğin içerikler"},
+ {id:"lib", ic:"💡", t:"Cephanelik", sub:"Hook, script ve AI promptları"},
+ {id:"youtube", ic:"▶️", t:"YouTube Nişleri", sub:"İngilizce faceless kanal planı"},
+ {id:"sales", ic:"🎯", t:"Satış & İkna", sub:"Telefon + yüzyüze + NLP taktikleri"},
+ {id:"crm", ic:"🤝", t:"Müşteriler (CRM)", sub:"Lead → toplantı → kapanış"},
+ {id:"money", ic:"💰", t:"Para & Borç", sub:"Gelir, gider, borç kapatma"},
+ {id:"tasks", ic:"🧩", t:"Görev Panosu", sub:"Yapılacak · yapılıyor · bitti"},
+ {id:"notes", ic:"📝", t:"Notlar", sub:"Fikirler ve toplantı notları"},
+ {id:"team", ic:"👥", t:"Ekip", sub:"Kullanıcı ekle/çıkar (admin)"},
+ {id:"settings", ic:"⚙️", t:"Ayarlar", sub:"Bulut · şifre · yedek"}
+];
+
+let currentView="home";
+
+/* ---------- LOGIN AKIŞI ---------- */
+function renderLogin(){
+  const row=document.getElementById("whoRow");
+  row.innerHTML=D.users.map((u,i)=>`<button data-u="${u.id}" class="${i===0?'on':''}" onclick="pickUser('${u.id}',this)">${esc(u.name)}<small>${esc(u.role)}</small></button>`).join("");
+  window._pick=D.users[0]?.id;
+}
+function pickUser(id,el){window._pick=id;document.querySelectorAll("#whoRow button").forEach(b=>b.classList.remove("on"));el.classList.add("on")}
+function doLogin(){
+  const u=D.users.find(x=>x.id===window._pick);
+  const pw=document.getElementById("pw").value;
+  const err=document.getElementById("loginErr");
+  if(!u){return}
+  if(pw!==u.pass){err.textContent="Şifre yanlış. Tekrar deneyin.";err.classList.remove("hidden");return}
+  ME=u;sessionStorage.setItem("evorisMe",u.id);
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  bootApp();
+}
+function logout(){ME=null;sessionStorage.removeItem("evorisMe");document.getElementById("app").classList.add("hidden");document.getElementById("login").classList.remove("hidden");document.getElementById("pw").value="";renderLogin()}
+
+/* ---------- APP BOOT ---------- */
+function bootApp(){
+  document.getElementById("wName").textContent=ME.name;
+  document.getElementById("wRole").textContent=ME.role;
+  document.getElementById("wAv").textContent=ME.av||ME.name[0];
+  buildNav();
+  buildViews();
+  go(currentView);
+  renderAll();
+  initialSync();
+}
+function buildNav(){
+  const items=MENU.filter(m=>m.id!=="team"||ME.admin);
+  document.getElementById("dnav").innerHTML=items.map(m=>`<button data-v="${m.id}" onclick="go('${m.id}')"><span class="ic">${m.ic}</span>${esc(m.t)}</button>`).join("");
+  document.getElementById("mnav").innerHTML=items.map(m=>`<button data-v="${m.id}" onclick="go('${m.id}')"><span class="ic">${m.ic}</span>${esc(m.t.split(" ")[0])}</button>`).join("");
+}
+function go(v){
+  currentView=v;
+  const m=MENU.find(x=>x.id===v)||MENU[0];
+  document.getElementById("vTitle").textContent=m.t;
+  document.getElementById("vSub").textContent=m.sub;
+  document.querySelectorAll("#views .view").forEach(x=>x.classList.toggle("active",x.id==="view-"+v));
+  document.querySelectorAll("#dnav button,#mnav button").forEach(b=>b.classList.toggle("active",b.dataset.v===v));
+  window.scrollTo(0,0);
+  renderView(v);
+}
+
+/* ---------- GÖRÜNÜM İSKELETİ ---------- */
+function buildViews(){
+  document.getElementById("views").innerHTML=MENU.map(m=>`<section class="view" id="view-${m.id}"></section>`).join("");
+}
+function renderAll(){renderView(currentView)}
+function renderView(v){
+  const el=document.getElementById("view-"+v);if(!el)return;
+  ({home:vHome,map:vMap,day:vDay,plan:vPlan,content:vContent,lib:vLib,youtube:vYoutube,sales:vSales,crm:vCrm,money:vMoney,tasks:vTasks,notes:vNotes,team:vTeam,settings:vSettings}[v]||(()=>{}))(el);
+}
+
+/* ---------- HOME ---------- */
+function taskStats(){let tot=0,done=0;ROADMAP.forEach((f,fi)=>f.tasks.forEach((_,ti)=>{tot++;if(D.tasksDone[fi+"-"+ti])done++}));return{tot,done,pct:tot?Math.round(done/tot*100):0}}
+function debtPct(){return Math.min(100,Math.round((D.debt.paid/Math.max(1,D.debt.start))*100))}
+function vHome(el){
+  const ts=taskStats();
+  const mrr=(D.goals.subs||0)*(D.goals.subPrice||0);
+  const incTot=D.income.reduce((s,i)=>s+ +i.amt,0);
+  const expTot=D.expense.reduce((s,i)=>s+ +i.amt,0);
+  const remain=Math.max(0,D.debt.start-D.debt.paid);
+  const fdate=D.focus.date===todayStr()?D.focus.text||"":"";
+  el.innerHTML=`
+   <div class="card">
+     <h3>Bugünün Tek İşi — ${esc(ME.name)}</h3>
+     <p class="muted" style="margin-top:0">Herkes kendi rolünde tek şeye odaklanır. Çok şey = hiçbir şey.</p>
+     <input id="todayFocus" placeholder="Bugün bitirirsem mutlu olacağım tek iş..." value="${esc(fdate)}">
+     <div style="margin-top:10px"><button class="btn sm full" onclick="saveFocus()">Kaydet 🔥</button></div>
+   </div>
+   <div class="grid g4">
+     <div class="stat"><div class="big">${daysSince()}</div><div class="lbl">90 günün günü</div></div>
+     <div class="stat ok"><div class="big">${ts.pct}%</div><div class="lbl">Yol haritası</div></div>
+     <div class="stat gold"><div class="big">${D.streak||0}</div><div class="lbl">Üst üste gün</div></div>
+     <div class="stat teal"><div class="big">${fmt(mrr)}₺</div><div class="lbl">Tekrarlayan gelir/ay</div></div>
+   </div>
+   <div class="card">
+     <h3>Borç Kapatma — birlikte</h3>
+     <div class="row" style="justify-content:space-between;align-items:baseline">
+       <div><span style="font-size:22px;font-weight:800;color:var(--gold)">${fmt(remain)}₺</span> <span class="muted">kaldı</span></div>
+       <div class="muted">${fmt(D.debt.paid)}₺ / ${fmt(D.debt.start)}₺ · %${debtPct()}</div>
+     </div>
+     <div class="pbar gold"><div style="width:${debtPct()}%"></div></div>
+     <p class="muted" style="margin-top:8px;font-size:12px">Her kapanan iş bu barı doldurur. Para sekmesinden geliri işle.</p>
+   </div>
+   <div class="grid g3">
+     <div class="stat ok"><div class="big">${fmt(incTot)}₺</div><div class="lbl">Toplam gelir</div></div>
+     <div class="stat bad"><div class="big">${fmt(expTot)}₺</div><div class="lbl">Toplam gider</div></div>
+     <div class="stat"><div class="big">${fmt((D.goals.followIG||0)+(D.goals.followX||0)+(D.goals.followYT||0))}</div><div class="lbl">Toplam takipçi</div></div>
+   </div>
+   <div class="card"><h3>Günün Hatırlatması</h3><p class="quote">${esc(QUOTES[daysSince()%QUOTES.length])}</p></div>
+   <div class="card">
+     <h3>Hızlı Erişim</h3>
+     <div class="row">
+       <button class="btn ghost sm" onclick="go('sales')">🎯 Satış scripti</button>
+       <button class="btn ghost sm" onclick="go('lib')">💡 İçerik promptları</button>
+       <button class="btn ghost sm" onclick="go('crm')">🤝 Yeni müşteri</button>
+       <button class="btn ghost sm" onclick="go('money')">💰 Gelir gir</button>
+     </div>
+   </div>`;
+}
+function saveFocus(){
+  D.focus={date:todayStr(),text:document.getElementById("todayFocus").value,by:ME.id};
+  if(D.lastDone!==todayStr()){D.streak=(D.lastDone===yestStr()||!D.streak)?(D.streak||0)+1:1;D.lastDone=todayStr()}
+  save();renderView("home");toast("Kaydedildi 🔥");
+}
+
+/* ---------- MAP ---------- */
+function vMap(el){
+  const ts=taskStats();
+  let h=`<div class="card"><h2>90 Günlük Yol Haritası</h2><p class="muted" style="margin-top:4px">Nakit önce. Tekrarlayan gelir sonra. Ölçek en son. Sırayla git.</p>
+    <div class="pbar"><div style="width:${ts.pct}%"></div></div>
+    <div class="muted" style="margin-top:6px;font-size:12px">${ts.done} / ${ts.tot} görev tamamlandı</div></div>`;
+  ROADMAP.forEach((f,fi)=>{
+    h+=`<div class="card"><span class="pill ${f.cls}">${esc(f.faz)}</span><h2 style="margin:9px 0 2px">${esc(f.title)}</h2><p class="muted" style="margin:0 0 10px">${esc(f.sub)}</p>`;
+    f.tasks.forEach((t,ti)=>{const k=fi+"-"+ti,on=!!D.tasksDone[k];
+      h+=`<div class="task ${on?'done':''}"><input type="checkbox" ${on?'checked':''} onchange="toggleTask('${k}')"><label onclick="this.previousElementSibling.click()"><span class="pill ${t[0]}" style="margin-right:6px;font-size:10px">${t[0].replace('p-','').toUpperCase()}</span>${esc(t[1])}</label></div>`});
+    h+=`</div>`;
+  });
+  h+=`<div class="card"><h3>Ay 4-12 · Sonra ne var?</h3><p class="muted" style="margin-top:0">Nakit akışı stabilse: ajansı ekiple büyüt, eğitim setini paketle, YouTube kanallarını monetize et, X aboneliğini ölçekle, en iyi kanallara küçük reklam bütçesi. Kod gerektiren özel platform/uygulama EN SON — önce nakit, sonra sistem.</p></div>`;
+  el.innerHTML=h;
+}
+function toggleTask(k){D.tasksDone[k]=!D.tasksDone[k];save();renderView("map");if(D.tasksDone[k])toast("👏 Bir adım daha")}
+
+/* ---------- DAY ---------- */
+function vDay(el){
+  let h=`<div class="card"><h2>Günlük Ritim (2-3 saat)</h2><p class="muted" style="margin-top:4px">Her gün aynı blok. Değişmez ritim = birikimli sonuç.</p></div>`;
+  DAYPLAN.forEach((t,i)=>{const on=D.dayDone[todayStr()+"-"+i];
+    h+=`<div class="task ${on?'done':''}" style="background:var(--panel);border:1px solid var(--line2);border-radius:11px;padding:13px;margin-bottom:9px"><input type="checkbox" ${on?'checked':''} onchange="toggleDay(${i})"><label onclick="this.previousElementSibling.click()">${esc(t)}</label></div>`});
+  h+=`<div class="card"><h3>Bölüşüm</h3><p class="muted" style="margin-top:0"><b style="color:var(--txt)">Mehmet</b> (gündüz iş, akşam 2-3 saat): kapanış, toplantı, strateji, içerik onayı, borç/para takibi.<br><br><b style="color:var(--txt)">Hatice</b> (gündüz esnek): arama bloğu, toplantı ayarlama, CRM güncelleme, story/DM, içerik çekim-montaj kuyruğu.<br><br><b style="color:var(--txt)">Birlikte</b> (müsait olunca): yüzyüze toplantılar, haftalık gözden geçirme, büyük kararlar.</p></div>`;
+  el.innerHTML=h;
+}
+function toggleDay(i){const k=todayStr()+"-"+i;D.dayDone[k]=!D.dayDone[k];save();renderView("day")}
+
+/* ---------- CONTENT ---------- */
+function vContent(el){
+  el.innerHTML=`<div class="card"><h2>İçerik Takvimi</h2><p class="muted" style="margin-top:4px">Instagram (gelişim, TR) · X (kripto, TR) · YouTube (faceless, EN). Sürdürülebilir > mükemmel.</p>
+     <label class="fl">Tarih</label><input type="date" id="cDate">
+     <label class="fl">Kanal</label><select id="cPlat"><option>Instagram Reels</option><option>Instagram Story</option><option>X (Twitter)</option><option>X Thread</option><option>YouTube</option><option>Telegram</option></select>
+     <label class="fl">Konu / Hook</label><input id="cHook" placeholder="Açılış cümlesi veya konu...">
+     <label class="fl">Durum</label><select id="cStatus"><option>💡 Fikir</option><option>✍️ Yazıldı</option><option>🎬 Çekildi</option><option>✅ Yayınlandı</option></select>
+     <label class="fl">Sorumlu</label><select id="cWho">${D.users.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join("")}</select>
+     <div style="margin-top:12px"><button class="btn full" onclick="addContent()">+ İçerik Ekle</button></div></div>
+   <div id="contentList"></div>`;
+  document.getElementById("cDate").value=todayStr();
+  document.getElementById("cWho").value=ME.id;
+  renderContentList();
+}
+function addContent(){
+  const c={date:document.getElementById("cDate").value||todayStr(),plat:document.getElementById("cPlat").value,hook:document.getElementById("cHook").value.trim(),status:document.getElementById("cStatus").value,who:document.getElementById("cWho").value,id:nowMs()};
+  if(!c.hook){toast("Konu/hook gir");return}
+  D.content.unshift(c);save();document.getElementById("cHook").value="";renderContentList();toast("İçerik eklendi")
+}
+function renderContentList(){
+  const list=document.getElementById("contentList");if(!list)return;
+  if(!D.content.length){list.innerHTML='<p class="muted" style="text-align:center;padding:20px">Henüz içerik yok. İlk fikri ekle 👆</p>';return}
+  list.innerHTML=D.content.map((c,i)=>{const u=D.users.find(x=>x.id===c.who);
+    return `<div class="card" style="padding:13px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="tag">${esc(c.plat)}</span><span style="font-size:12px">${esc(c.status)}</span></div><p style="margin:0 0 8px">${esc(c.hook)}</p><div style="display:flex;justify-content:space-between;align-items:center"><span class="muted" style="font-size:12px">${esc(c.date)} · ${esc(u?u.name:'?')}</span><span class="btn bad xs" onclick="delItem('content',${i})">Sil</span></div></div>`}).join("");
+}
+
+/* ---------- 90 GÜNLÜK PLAN ---------- */
+function vPlan(el){
+  const todayOff=planTodayOffset();
+  let done=0;for(let i=1;i<=90;i++)if(D.planDone["d"+i])done++;
+  const chanColor={ig:"p-insta",x:"p-x",yt:"p-youtube"};
+  let h=`<div class="card"><h2>90 Günlük Gün-Gün Plan</h2><p class="muted" style="margin-top:4px">Instagram (gelişim) · X (kripto eğitim) · YouTube (İngilizce). Her gün ne paylaşacağın hazır. Bugünkü satır vurgulu. Telegram botun da her sabah bunu telefonuna yollar.</p>
+    <div class="pbar" style="margin-top:10px"><div style="width:${Math.round(done/90*100)}%"></div></div>
+    <div class="muted" style="margin-top:6px;font-size:12px">${done}/90 gün işaretlendi · Bugün: ${todayOff>=1&&todayOff<=90?("Gün "+todayOff):"plan aralığı dışında"}</div></div>`;
+  for(let w=0;w<13;w++){
+    const wk=WEEKS[w];
+    const isCurWeek=todayOff>=1&&Math.floor((todayOff-1)/7)===w;
+    h+=`<details class="acc" ${isCurWeek?"open":""}><summary>Hafta ${wk.n} — ${esc(wk.theme)} ${isCurWeek?'<span class="badge">BU HAFTA</span>':''}</summary><div class="body" style="padding:0 10px 10px">`;
+    for(let dd=0;dd<7;dd++){
+      const off=w*7+dd+1; if(off>90)break;
+      const day=buildDay(off);
+      const isToday=off===todayOff;
+      const dk="d"+off, on=!!D.planDone[dk];
+      h+=`<div style="border:1px solid ${isToday?'var(--gold)':'var(--line2)'};border-radius:10px;padding:11px;margin-bottom:8px;background:${isToday?'#ffb5450d':'var(--panel)'}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:9px"><input type="checkbox" ${on?'checked':''} onchange="togglePlan('${dk}')" style="width:19px;height:19px;accent-color:var(--ok)"><b style="font-size:13px">Gün ${off} · ${GUN_ADI[day.dow]}</b> <span class="muted" style="font-size:11px">${day.date.toLocaleDateString('tr-TR',{day:'numeric',month:'short'})}</span></div>
+          ${isToday?'<span class="badge">BUGÜN</span>':''}
+        </div>`;
+      day.items.forEach(it=>{
+        h+=`<div class="swipe" style="margin-bottom:7px;padding:10px"><span class="cat"><span class="pill ${chanColor[it.c]}" style="font-size:9px;padding:1px 7px">${it.label}</span></span><button class="btn ghost xs copy" onclick="cp(this,${jsq(it.text)})" style="position:absolute;top:9px;right:9px">Kopyala</button><p style="margin:6px 0 0;font-size:13px">${esc(it.text)}${it.ready?' <span class="dim" style="font-size:11px">← direkt yapıştır</span>':''}</p></div>`;
+      });
+      h+=`</div>`;
+    }
+    h+=`</div></details>`;
+  }
+  h+=`<div class="card"><h3>Nasıl kullanılır</h3><p class="muted" style="margin-top:0">Bu plan bir iskelet — her satır bir konu. Tam metni için o konuyu <b>Cephanelik</b>'teki uygun Claude promptuna yapıştır (reels script / X thread / YouTube script). "Günlük tweet (hazır)" satırları zaten yapıştırmaya hazır. İşaretlediğin günler yukarıdaki bardan sayılır.</p></div>`;
+  el.innerHTML=h;
+}
+function togglePlan(k){D.planDone[k]=!D.planDone[k];save();renderView("plan");if(D.planDone[k])toast("✅ Gün işaretlendi")}
+
+/* ---------- LIB ---------- */
+function vLib(el){
+  const hooks=[...D.customHooks.map(t=>({cat:"Senin",t,custom:true})),...HOOKS];
+  el.innerHTML=`<div class="card"><h2>Hook & Script Cephaneliği</h2><p class="muted" style="margin-top:4px">Kutup: değer/öz-saygı/ajans — öfke değil. Kopyala, kendine uyarla.</p>
+      <div class="row" style="margin-top:10px"><input id="newHook" placeholder="Kendi hook'unu ekle..." style="flex:1"><button class="btn" onclick="addHook()">+</button></div></div>
+    <div id="hookList">${hooks.map((h,i)=>`<div class="swipe"><span class="cat">${esc(h.cat)}</span><button class="btn ghost sm copy" onclick="cp(this,${jsq(h.t)})">Kopyala</button><p>${esc(h.t)}</p>${h.custom?`<button class="btn bad xs" style="margin-top:8px" onclick="delHook(${i})">Sil</button>`:""}</div>`).join("")}</div>
+    <div class="card" style="margin-top:20px"><h2>🤖 AI Asistan Promptları (Claude Pro)</h2><p class="muted" style="margin-top:4px">Kopyala → Claude'a yapıştır → [köşeli parantez]leri doldur. Senin yerine düşünen ekip.</p></div>
+    ${PROMPTS.map(p=>`<div class="swipe"><span class="cat">${esc(p.t)}</span><div class="muted" style="font-size:12px;margin:4px 0 8px">${esc(p.d)}</div><button class="btn gold sm full" onclick="cp(this,${jsq(p.p)})">📋 Kopyala</button></div>`).join("")}`;
+}
+function jsq(s){return JSON.stringify(String(s))}
+function addHook(){const v=document.getElementById("newHook").value.trim();if(!v)return;D.customHooks.unshift(v);save();renderView("lib");toast("Eklendi")}
+function delHook(i){D.customHooks.splice(i,1);save();renderView("lib")}
+function cp(btn,txt){navigator.clipboard.writeText(txt).then(()=>{const o=btn.textContent;btn.textContent="✓ Kopyalandı";setTimeout(()=>btn.textContent=o,1200);toast("Kopyalandı")}).catch(()=>{const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();toast("Kopyalandı")})}
+
+/* ---------- YOUTUBE ---------- */
+function vYoutube(el){
+  el.innerHTML=`<div class="card"><h2>YouTube Nişleri — İngilizce, Faceless, 8+ dk</h2><p class="muted" style="margin-top:4px">Yüz gerektirmez: ekran/stok görsel + voiceover. Claude script yazar, sen seslendirir + montajlarsın. İngilizce = global kitle + yüksek reklam getirisi.</p></div>
+    ${YT_NICHES.map(n=>`<details class="acc"><summary>${esc(n.name)} <span class="badge">${esc(n.tag)}</span></summary><div class="body">
+       <p><b>Neden bu niş:</b> ${esc(n.why)}</p>
+       <p><b>Format:</b> ${esc(n.format)}</p>
+       <p><b>İlk 5 video başlığı (kopyala):</b></p>
+       ${n.titles.map(t=>`<div class="swipe" style="margin-bottom:8px"><button class="btn ghost sm copy" onclick="cp(this,${jsq(t)})">Kopyala</button><p style="margin:0">${esc(t)}</p></div>`).join("")}
+      </div></details>`).join("")}
+    <div class="card"><h3>Video Script Şablonu</h3><p class="muted" style="white-space:pre-wrap;margin-top:0">${esc(YT_SCRIPT_TEMPLATE)}</p>
+      <button class="btn gold sm full" style="margin-top:8px" onclick="cp(this,${jsq(PROMPTS.find(p=>p.t.includes('YouTube')).p)})">📋 YouTube script promptunu kopyala</button></div>`;
+}
+
+/* ---------- SALES ---------- */
+function vSales(el){
+  el.innerHTML=`<div class="card"><h2>Satış & İkna Merkezi</h2><p class="muted" style="margin-top:4px">Telefon → toplantı → kapanış. NLP/ikna taktikleri etik çerçevede: değer sat, kovalama, seçici dur.</p></div>
+    <div class="card"><h3>📞 Telefon Script'i (Hatice)</h3><div class="callflow">${CALL_SCRIPT.map(s=>`<div class="s"><div class="n"></div><div class="c">${s.c}</div></div>`).join("")}</div>
+      <button class="btn gold sm full" style="margin-top:12px" onclick="cp(this,${jsq(CALL_SCRIPT.map((s,i)=>(i+1)+'. '+s.c.replace(/<[^>]+>/g,'')).join('\n\n'))})">📋 Tüm telefon scriptini kopyala</button></div>
+    <div class="card"><h3>🤝 Yüzyüze / Online Toplantı Akışı</h3><div class="callflow">${MEETING_FLOW.map(s=>`<div class="s"><div class="n"></div><div class="c">${s.c}</div></div>`).join("")}</div></div>
+    <div class="card"><h2>🧠 İkna & NLP Taktikleri</h2><p class="muted" style="margin-top:4px">Muhtaç değilsin — onun sorununu çözüyorsun. Duruş budur.</p>
+      ${PERSUASION.map(p=>`<details class="acc"><summary>${esc(p.t)}</summary><div class="body"><p style="margin:0">${esc(p.d)}</p></div></details>`).join("")}</div>
+    <div class="card"><h3>İtiraz Karşılama — hızlı</h3><button class="btn gold sm full" onclick="cp(this,${jsq(PROMPTS.find(p=>p.t.includes('İtiraz')).p)})">📋 İtiraz karşılama promptunu kopyala (Claude)</button></div>`;
+}
+
+/* ---------- CRM ---------- */
+function vCrm(el){
+  const stages=["yeni","arandi","toplanti","kapandi","kayip"];
+  const cnt=k=>D.leads.filter(l=>l.st===k).length;
+  el.innerHTML=`<div class="card"><h2>Müşteriler (CRM)</h2><p class="muted" style="margin-top:4px">Her aramayı, her toplantıyı buraya işle. Kapanan işi Para sekmesine de geç.</p>
+      <div class="grid g4" style="margin-top:10px">
+        <div class="stat"><div class="big">${cnt('yeni')}</div><div class="lbl">Yeni</div></div>
+        <div class="stat gold"><div class="big">${cnt('arandi')}</div><div class="lbl">Arandı</div></div>
+        <div class="stat teal"><div class="big">${cnt('toplanti')}</div><div class="lbl">Toplantı</div></div>
+        <div class="stat ok"><div class="big">${cnt('kapandi')}</div><div class="lbl">Kapandı</div></div>
+      </div>
+      <label class="fl">İşletme / kişi</label><input id="lName" placeholder="Örn. Nova Kuaför — Ahmet Bey">
+      <div class="grid g2"><div><label class="fl">Telefon</label><input id="lPhone" placeholder="05..."></div><div><label class="fl">Sektör</label><input id="lSector" placeholder="Kuaför / klinik / emlak..."></div></div>
+      <label class="fl">Durum</label><select id="lSt"><option value="yeni">Yeni</option><option value="arandi">Arandı</option><option value="toplanti">Toplantı ayarlandı</option><option value="kapandi">Kapandı ✅</option><option value="kayip">Kayıp</option></select>
+      <label class="fl">Not</label><input id="lNote" placeholder="Kısa not...">
+      <div style="margin-top:12px"><button class="btn full" onclick="addLead()">+ Müşteri Ekle</button></div></div>
+    <div id="leadList"></div>`;
+  renderLeads();
+}
+function addLead(){
+  const l={id:nowMs(),name:document.getElementById("lName").value.trim(),phone:document.getElementById("lPhone").value.trim(),sector:document.getElementById("lSector").value.trim(),st:document.getElementById("lSt").value,note:document.getElementById("lNote").value.trim(),by:ME.id};
+  if(!l.name){toast("İsim gir");return}
+  D.leads.unshift(l);save();renderView("crm");toast("Müşteri eklendi")
+}
+function renderLeads(){
+  const el=document.getElementById("leadList");if(!el)return;
+  if(!D.leads.length){el.innerHTML='<p class="muted" style="text-align:center;padding:20px">Henüz müşteri yok. İlkini ekle 👆</p>';return}
+  const names={yeni:"Yeni",arandi:"Arandı",toplanti:"Toplantı",kapandi:"Kapandı",kayip:"Kayıp"};
+  el.innerHTML=D.leads.map((l,i)=>`<div class="lead"><div style="display:flex;justify-content:space-between;align-items:center"><span class="nm">${esc(l.name)}</span><span class="st ${l.st}">${names[l.st]}</span></div>
+     <div class="muted" style="font-size:12px;margin-top:4px">${esc(l.sector||"")}${l.phone?" · "+esc(l.phone):""}</div>
+     ${l.note?`<div style="font-size:13px;margin-top:6px">${esc(l.note)}</div>`:""}
+     <div class="row" style="margin-top:9px">
+       <select onchange="setLeadSt(${i},this.value)" style="max-width:170px">${["yeni","arandi","toplanti","kapandi","kayip"].map(s=>`<option value="${s}" ${l.st===s?"selected":""}>${names[s]}</option>`).join("")}</select>
+       <button class="btn bad xs" onclick="delItem('leads',${i})">Sil</button>
+     </div></div>`).join("");
+}
+function setLeadSt(i,v){D.leads[i].st=v;save();renderView("crm");if(v==="kapandi")toast("🎉 Kapandı! Parayı işlemeyi unutma")}
+
+/* ---------- MONEY ---------- */
+function vMoney(el){
+  const mrr=(D.goals.subs||0)*(D.goals.subPrice||0);
+  const incTot=D.income.reduce((s,i)=>s+ +i.amt,0), expTot=D.expense.reduce((s,i)=>s+ +i.amt,0);
+  const remain=Math.max(0,D.debt.start-D.debt.paid);
+  el.innerHTML=`
+   <div class="card"><h3>Borç Kapatma</h3>
+     <div class="grid g2"><div><label class="fl">Toplam borç (₺)</label><input type="number" id="dStart" value="${D.debt.start}"></div>
+       <div><label class="fl">Şu ana dek kapatılan (₺)</label><input type="number" id="dPaid" value="${D.debt.paid}"></div></div>
+     <button class="btn full" style="margin-top:12px" onclick="saveDebt()">Güncelle</button>
+     <div class="pbar gold" style="margin-top:14px"><div style="width:${debtPct()}%"></div></div>
+     <div class="muted" style="margin-top:6px">Kalan: <b style="color:var(--gold)">${fmt(remain)}₺</b> · %${debtPct()} kapandı</div></div>
+
+   <div class="card"><h3>Hedefler & Takipçiler</h3>
+     <div class="grid g2">
+       <div><label class="fl">Instagram takipçi</label><input type="number" id="gIG" value="${D.goals.followIG||0}"></div>
+       <div><label class="fl">X takipçi</label><input type="number" id="gX" value="${D.goals.followX||0}"></div>
+       <div><label class="fl">YouTube abone</label><input type="number" id="gYT" value="${D.goals.followYT||0}"></div>
+       <div><label class="fl">Ödeyen üye/abone</label><input type="number" id="gSubs" value="${D.goals.subs||0}"></div>
+       <div><label class="fl">Üye başı ₺/ay</label><input type="number" id="gPrice" value="${D.goals.subPrice||400}"></div>
+     </div>
+     <button class="btn full" style="margin-top:12px" onclick="saveGoals()">Güncelle</button>
+     <div class="stat teal" style="margin-top:14px"><div class="big">${fmt(mrr)}₺</div><div class="lbl">Tahmini tekrarlayan gelir / ay</div></div></div>
+
+   <div class="grid g2">
+     <div class="stat ok"><div class="big">${fmt(incTot)}₺</div><div class="lbl">Toplam gelir</div></div>
+     <div class="stat bad"><div class="big">${fmt(expTot)}₺</div><div class="lbl">Toplam gider</div></div>
+   </div>
+
+   <div class="card"><h2>💵 Gelir Kaydı</h2>
+     <div class="row"><input id="incLabel" placeholder="Açıklama (örn. Nova Kuaför kurulum)" style="flex:1"><input type="number" id="incAmt" placeholder="₺" style="max-width:110px"><button class="btn" onclick="addMoney('income')">+</button></div>
+     <div id="incList" style="margin-top:12px"></div><div class="bars" id="incBars"></div></div>
+
+   <div class="card"><h2>🧾 Gider Kaydı</h2>
+     <div class="row"><input id="expLabel" placeholder="Açıklama (örn. domain, araç)" style="flex:1"><input type="number" id="expAmt" placeholder="₺" style="max-width:110px"><button class="btn ghost" onclick="addMoney('expense')">+</button></div>
+     <div id="expList" style="margin-top:12px"></div></div>`;
+  renderMoneyLists();
+}
+function saveDebt(){D.debt.start=+document.getElementById("dStart").value||0;D.debt.paid=+document.getElementById("dPaid").value||0;save();renderView("money");renderView("home");toast("Borç güncellendi")}
+function saveGoals(){D.goals.followIG=+document.getElementById("gIG").value||0;D.goals.followX=+document.getElementById("gX").value||0;D.goals.followYT=+document.getElementById("gYT").value||0;D.goals.subs=+document.getElementById("gSubs").value||0;D.goals.subPrice=+document.getElementById("gPrice").value||0;save();renderView("money");toast("Güncellendi 📈")}
+function addMoney(kind){
+  const l=document.getElementById(kind==="income"?"incLabel":"expLabel").value.trim();
+  const a=document.getElementById(kind==="income"?"incAmt":"expAmt").value;
+  if(!l||!a){toast("Açıklama + tutar gir");return}
+  D[kind].unshift({label:l,amt:a,date:todayStr(),by:ME.id});
+  if(kind==="income"){D.debt.paid=Math.min(D.debt.start,(D.debt.paid||0));}
+  save();renderView("money");renderView("home");toast(kind==="income"?"Gelir eklendi 💰":"Gider eklendi")
+}
+function renderMoneyLists(){
+  const il=document.getElementById("incList"),xl=document.getElementById("expList");
+  if(il){il.innerHTML=D.income.length?D.income.map((it,i)=>`<div class="inc-item"><span>${esc(it.label)} <span class="dim" style="font-size:11px">${esc(it.date)}</span></span><span><b style="color:var(--ok)">${fmt(it.amt)}₺</b> <span class="btn bad xs" onclick="delItem('income',${i})">×</span></span></div>`).join(""):'<p class="muted" style="font-size:13px">Henüz gelir yok.</p>'}
+  if(xl){xl.innerHTML=D.expense.length?D.expense.map((it,i)=>`<div class="inc-item"><span>${esc(it.label)} <span class="dim" style="font-size:11px">${esc(it.date)}</span></span><span><b style="color:var(--bad)">${fmt(it.amt)}₺</b> <span class="btn bad xs" onclick="delItem('expense',${i})">×</span></span></div>`).join(""):'<p class="muted" style="font-size:13px">Henüz gider yok.</p>'}
+  const bars=document.getElementById("incBars");
+  if(bars){const last=D.income.slice(0,8).reverse();const max=Math.max(1,...last.map(i=>+i.amt));bars.innerHTML=last.map(i=>`<div class="b" style="height:${Math.max(5,+i.amt/max*100)}%"><span>${(+i.amt/1000).toFixed(0)}k</span></div>`).join("")}
+}
+
+/* ---------- TASKS (kanban) ---------- */
+function vTasks(el){
+  el.innerHTML=`<div class="card"><h2>Görev Panosu</h2><p class="muted" style="margin-top:4px">Serbest görevler. Yol haritası dışındaki her şey buraya.</p>
+      <div class="row" style="margin-top:8px"><input id="ktext" placeholder="Yeni görev..." style="flex:1"><select id="kwho" style="max-width:120px">${D.users.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join("")}</select><button class="btn" onclick="addKanban()">+</button></div></div>
+    <div class="kanban">
+      ${["todo","doing","done"].map(col=>`<div class="kcol"><h4>${({todo:"Yapılacak",doing:"Yapılıyor",done:"Bitti"})[col]} <span>${D.kanban[col].length}</span></h4>${D.kanban[col].map((c,i)=>{const u=D.users.find(x=>x.id===c.who);return `<div class="kcard">${esc(c.text)}<div class="meta"><span class="tag">${esc(u?u.name:'')}</span><span>${col!=="todo"?`<button class="btn ghost xs" onclick="moveK('${col}','left',${i})">◀</button>`:""}${col!=="done"?`<button class="btn ghost xs" onclick="moveK('${col}','right',${i})">▶</button>`:""}<button class="btn bad xs" onclick="delK('${col}',${i})">×</button></span></div></div>`}).join("")}</div>`).join("")}
+    </div>`;
+}
+function addKanban(){const t=document.getElementById("ktext").value.trim();if(!t)return;D.kanban.todo.unshift({text:t,who:document.getElementById("kwho").value,id:nowMs()});save();renderView("tasks");toast("Görev eklendi")}
+function moveK(col,dir,i){const order=["todo","doing","done"];const ci=order.indexOf(col);const ni=dir==="right"?ci+1:ci-1;if(ni<0||ni>2)return;const [it]=D.kanban[col].splice(i,1);D.kanban[order[ni]].unshift(it);save();renderView("tasks")}
+function delK(col,i){D.kanban[col].splice(i,1);save();renderView("tasks")}
+
+/* ---------- NOTES ---------- */
+function vNotes(el){
+  el.innerHTML=`<div class="card"><h2>Notlar</h2><textarea id="noteText" placeholder="Fikir, toplantı notu, karar..."></textarea><div style="margin-top:10px"><button class="btn full" onclick="addNote()">+ Not Ekle</button></div></div>
+    <div id="noteList"></div>`;
+  renderNotes();
+}
+function addNote(){const t=document.getElementById("noteText").value.trim();if(!t)return;D.notes.unshift({text:t,date:todayStr(),by:ME.id,id:nowMs()});save();renderView("notes");toast("Not eklendi")}
+function renderNotes(){const el=document.getElementById("noteList");if(!el)return;if(!D.notes.length){el.innerHTML='<p class="muted" style="text-align:center;padding:20px">Henüz not yok.</p>';return}el.innerHTML=D.notes.map((n,i)=>{const u=D.users.find(x=>x.id===n.by);return `<div class="note">${esc(n.text)}<div class="muted" style="font-size:11px;margin-top:8px;display:flex;justify-content:space-between"><span>${esc(n.date)} · ${esc(u?u.name:'')}</span><span class="btn bad xs" onclick="delItem('notes',${i})">Sil</span></div></div>`}).join("")}
+
+/* ---------- TEAM (admin) ---------- */
+function vTeam(el){
+  if(!ME.admin){el.innerHTML='<div class="card"><p class="muted">Bu bölüm sadece admin (Mehmet) içindir.</p></div>';return}
+  el.innerHTML=`<div class="card"><h2>Ekip Yönetimi</h2><p class="muted" style="margin-top:4px">Çalışan ekle/çıkar. Yeni kişi kendi girişiyle panele erişir. Admin sadece sen.</p>
+      <label class="fl">İsim</label><input id="tName" placeholder="Örn. Ayşe">
+      <div class="grid g2"><div><label class="fl">Rol</label><input id="tRole" placeholder="Satış / içerik / operasyon"></div><div><label class="fl">Şifre</label><input id="tPass" placeholder="Giriş şifresi"></div></div>
+      <label class="fl"><input type="checkbox" id="tAdmin" style="width:auto;display:inline;margin-right:6px">Admin yetkisi ver</label>
+      <div style="margin-top:12px"><button class="btn full" onclick="addUser()">+ Kişi Ekle</button></div></div>
+    <div>${D.users.map((u,i)=>`<div class="lead"><div style="display:flex;justify-content:space-between;align-items:center"><span class="nm">${esc(u.name)} ${u.admin?'<span class="badge">ADMIN</span>':''}</span>${u.id!=='mehmet'?`<button class="btn bad xs" onclick="delUser(${i})">Çıkar</button>`:'<span class="muted" style="font-size:11px">kalıcı</span>'}</div><div class="muted" style="font-size:12px;margin-top:4px">${esc(u.role)} · şifre: ${esc(u.pass)}</div></div>`).join("")}</div>`;
+}
+function addUser(){
+  const name=document.getElementById("tName").value.trim();const role=document.getElementById("tRole").value.trim()||"Ekip";const pass=document.getElementById("tPass").value.trim();
+  if(!name||!pass){toast("İsim + şifre gir");return}
+  const id=name.toLowerCase().replace(/[^a-z0-9]/g,"")+ (D.users.length);
+  D.users.push({id,name,role,admin:document.getElementById("tAdmin").checked,pass,av:name[0].toUpperCase()});
+  save();renderView("team");toast("Kişi eklendi")
+}
+function delUser(i){if(D.users[i].id==="mehmet")return;if(!confirm(D.users[i].name+" çıkarılsın mı?"))return;D.users.splice(i,1);save();renderView("team")}
+
+/* ---------- SETTINGS ---------- */
+function vSettings(el){
+  el.innerHTML=`
+   <div class="card"><h2>☁️ Bulut (Supabase)</h2><p class="muted" style="margin-top:4px">Verileri buluta bağla — Mehmet ve Hatice her cihazdan aynı veriyi görür. Kurulum rehberi PDF'inde adım adım anlatıldı.</p>
+     <label class="fl">Supabase Project URL</label><input id="sbUrl" placeholder="https://xxxx.supabase.co" value="${esc(D.supabase.url)}">
+     <label class="fl">Supabase anon (public) key</label><input id="sbKey" placeholder="eyJhbGci..." value="${esc(D.supabase.key)}">
+     <div class="row" style="margin-top:12px"><button class="btn" style="flex:1" onclick="saveSupabase()">Bağla & Eşitle</button><button class="btn ghost" onclick="pushNow()">↻ Şimdi eşitle</button></div>
+     <p class="muted" style="font-size:12px;margin-top:10px">Durum: <b id="sbStatus">${syncState==="on"?"Bağlı ✓":syncState==="err"?"Hata":"Yerel"}</b></p></div>
+
+   <div class="card"><h3>🔒 Şifre Değiştir (${esc(ME.name)})</h3>
+     <label class="fl">Yeni şifre</label><input type="password" id="npw" placeholder="Yeni şifre">
+     <div style="margin-top:10px"><button class="btn full" onclick="changePw()">Şifreyi Değiştir</button></div></div>
+
+   <div class="card"><h3>💾 Yedek</h3><p class="muted" style="margin-top:0;font-size:12px">Bulut kapalıysa cihazlar arası veriyi bununla taşı.</p>
+     <div class="row"><button class="btn ghost sm" style="flex:1" onclick="exportData()">⬇ Yedek indir</button><button class="btn ghost sm" style="flex:1" onclick="document.getElementById('imp').click()">⬆ Yedek yükle</button></div>
+     <input type="file" id="imp" accept=".json" class="hidden" onchange="importData(event)"></div>
+
+   <div class="card"><h3>Başlangıç Tarihi</h3><label class="fl">90 günün 1. günü</label><input type="date" id="startD" value="${D.startDate}"><div style="margin-top:10px"><button class="btn ghost sm full" onclick="D.startDate=document.getElementById('startD').value||todayStr();save();renderView('settings');toast('Güncellendi')">Kaydet</button></div></div>
+
+   <div class="card"><h3 style="color:var(--bad)">Tehlikeli Bölge</h3><button class="btn bad sm full" onclick="if(confirm('TÜM veriler bu cihazdan silinsin mi? (Bulut varsa oradan geri gelebilir)')){localStorage.removeItem('evorisHQ');location.reload()}">Yerel veriyi sıfırla</button></div>`;
+}
+function saveSupabase(){D.supabase.url=document.getElementById("sbUrl").value.trim();D.supabase.key=document.getElementById("sbKey").value.trim();saveLocal();if(sbInit()){toast("Bağlanıyor...");initialSync().then(()=>{const s=document.getElementById("sbStatus");if(s)s.textContent=syncState==="on"?"Bağlı ✓":"Hata"})}else{setSync("local");toast("URL + key gerekli")}}
+function changePw(){const v=document.getElementById("npw").value;if(v.length<4){toast("En az 4 karakter");return}const u=D.users.find(x=>x.id===ME.id);u.pass=v;ME.pass=v;save();document.getElementById("npw").value="";toast("Şifre değişti 🔒")}
+
+/* ---------- ORTAK ---------- */
+function delItem(key,i){D[key].splice(i,1);save();renderView(currentView)}
+function exportData(){const b=new Blob([JSON.stringify(D)],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="evoris-yedek-"+todayStr()+".json";a.click();URL.revokeObjectURL(u);toast("Yedek indirildi")}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);D={...DEFAULT,...j};save();location.reload()}catch(x){alert("Geçersiz dosya")}};r.readAsText(f)}
+
+/* ---------- BAŞLAT ---------- */
+loadLocal();
+renderLogin();
+// oturum hatırla
+const savedMe=sessionStorage.getItem("evorisMe");
+if(savedMe){const u=D.users.find(x=>x.id===savedMe);if(u){ME=u;document.getElementById("login").classList.add("hidden");document.getElementById("app").classList.remove("hidden");bootApp();}}
+</script>
+</body>
+</html>
